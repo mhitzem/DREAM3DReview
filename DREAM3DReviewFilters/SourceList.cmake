@@ -17,7 +17,7 @@ set(_PublicFilters
   AverageEdgeFaceCellArrayToVertexArray
   AverageVertexArrayToEdgeFaceCellArray
   ComputeUmeyamaTransform
-
+  EstablishFoamMorphology
   DBSCAN
   ExtractInternalSurfacesFromTriangleGeometry
   FindArrayStatistics
