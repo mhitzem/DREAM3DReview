@@ -1127,7 +1127,7 @@ void EstablishFoamMorphology::place_features(const Int32ArrayType::Pointer& feat
 
   StatsDataArray& statsDataArray = *(m_StatsDataArray.lock());
   ImageGeom::Pointer imageGeom = m->getGeometryAs<ImageGeom>();
-  SizeVec3Type udims = imageGeom->getDimensions();
+  SizeVec3Type udims = imageGeom->getDimensions_as_array();
 
   FloatVec3Type res = imageGeom->getSpacing();
 
@@ -2608,7 +2608,7 @@ void EstablishFoamMorphology::assign_voxels()
 
   size_t totalPoints = m->getAttributeMatrix(m_OutputCellAttributeMatrixPath.getAttributeMatrixName())->getNumberOfTuples();
 
-  SizeVec3Type udims = m->getGeometryAs<ImageGeom>()->getDimensions();
+  SizeVec3Type udims = m->getGeometryAs<ImageGeom>()->getDimensions_as_array();
 
   const std::array<int64_t, 3> dims = {
       static_cast<int64_t>(udims[0]),
@@ -3235,7 +3235,7 @@ void EstablishFoamMorphology::form_struts()
 {
   DataContainer::Pointer m = getDataContainerArray()->getDataContainer(getOutputCellAttributeMatrixPath().getDataContainerName());
 
-  SizeVec3Type udims = m->getGeometryAs<ImageGeom>()->getDimensions();
+  SizeVec3Type udims = m->getGeometryAs<ImageGeom>()->getDimensions_as_array();
 
   size_t point = 0;
   size_t kstride = 0;
@@ -3313,7 +3313,7 @@ void EstablishFoamMorphology::find_euclideandistmap()
   int32_t feature = 0;
   std::vector<int32_t> coordination;
 
-  SizeVec3Type udims = m->getGeometryAs<ImageGeom>()->getDimensions();
+  SizeVec3Type udims = m->getGeometryAs<ImageGeom>()->getDimensions_as_array();
 
   std::array<int64_t, 3> dims = {
       static_cast<int64_t>(udims[0]),
