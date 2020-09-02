@@ -289,11 +289,7 @@
             "Phase Count": 3
         },
         "StatsDataArrayName": "Statistics",
-        "StatsGeneratorDataContainerName": {
-            "Attribute Matrix Name": "",
-            "Data Array Name": "",
-            "Data Container Name": "StatsGeneratorDataContainer"
-        }
+        "DataContainerName": "StatsGeneratorDataContainer"
     },
     "01": {
         "FilterVersion": "6.6.45",
@@ -315,11 +311,7 @@
     },
     "02": {
         "CellAttributeMatrixName": "CellData",
-        "DataContainerName": {
-            "Attribute Matrix Name": "",
-            "Data Array Name": "",
-            "Data Container Name": "SyntheticVolumeDataContainer"
-        },
+        "DataContainerName": "SyntheticVolumeDataContainer",
         "Dimensions": {
             "x": 200,
             "y": 400,
