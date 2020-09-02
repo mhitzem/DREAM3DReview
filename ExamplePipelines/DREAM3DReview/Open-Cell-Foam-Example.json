@@ -107,8 +107,8 @@
                 },
                 "FeatureSize Vs Neighbors Distributions": {
                     "Average": [
-                        null,
-                        null,
+                        0,
+                        0,
                         0.6931471824645996,
                         1.3862943649291992,
                         1.7917594909667969,
@@ -289,10 +289,10 @@
             "Phase Count": 3
         },
         "StatsDataArrayName": "Statistics",
-        "DataContainerName": "StatsGeneratorDataContainer"
+        "StatsGeneratorDataContainerName": "StatsGeneratorDataContainer"
     },
     "01": {
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Establish Shape Types",
         "Filter_Name": "EstablishShapeTypes",
@@ -310,6 +310,7 @@
         "ShapeTypesArrayName": "ShapeTypes"
     },
     "02": {
+        "BoxDimensions": "X Range: 0 to 100 (Delta: 100)\nY Range: 0 to 200 (Delta: 200)\nZ Range: 0 to 64 (Delta: 64)",
         "CellAttributeMatrixName": "CellData",
         "DataContainerName": "SyntheticVolumeDataContainer",
         "Dimensions": {
@@ -317,8 +318,10 @@
             "y": 400,
             "z": 128
         },
+        "EnsembleAttributeMatrixName": "CellEnsembleData",
         "EstimateNumberOfFeatures": 1,
-        "FilterVersion": "6.6.45",
+        "EstimatedPrimaryFeatures": "5796",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Initialize Synthetic Volume",
         "Filter_Name": "InitializeSyntheticVolume",
@@ -333,13 +336,12 @@
             "Data Array Name": "Statistics",
             "Data Container Name": "StatsGeneratorDataContainer"
         },
-        "LengthUnit": 6,
         "Origin": {
             "x": 0,
             "y": 0,
             "z": 0
         },
-        "Spacing": {
+        "Resolution": {
             "x": 0.5,
             "y": 0.5,
             "z": 0.5
@@ -347,14 +349,10 @@
     },
     "03": {
         "CellPhasesArrayName": "Phases",
-        "CsvOutputFile": "/Users/mjackson/DREAM3D-Dev/DREAM3D-Build/Release/Bin/C/Users/jtucker",
-        "DataContainerName": {
-            "Attribute Matrix Name": "",
-            "Data Array Name": "",
-            "Data Container Name": "SyntheticVolumeDataContainer"
-        },
+        "CsvOutputFile": "",
+        "DataContainerName": "SyntheticVolumeDataContainer",
         "FeatureIdsArrayName": "FeatureIds",
-        "FilterVersion": "1.0.1055",
+        "FilterVersion": "1.0.89",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Establish Foam Morphology",
         "Filter_Name": "EstablishFoamMorphology",
@@ -409,7 +407,7 @@
             "Data Array Name": "FeatureIds",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Find Feature Centroids",
         "Filter_Name": "FindFeatureCentroids",
@@ -421,7 +419,7 @@
             "Data Array Name": "FeatureIds",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Find Surface Features",
         "Filter_Name": "FindSurfaceFeatures",
@@ -440,7 +438,7 @@
             "Data Array Name": "Centroids",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Find Biased Features (Bounding Box)",
         "Filter_Name": "FindBoundingBoxFeatures",
@@ -462,7 +460,7 @@
         "FeatureIdsArrayName": "FeatureIds2",
         "FeatureInputFile": "/Users/mjackson/DREAM3D-Dev/DREAM3D-Build/Release/Bin/C\\Users\\jtucker",
         "FeaturePhasesArrayName": "Phases2",
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Pack Primary Phases",
         "Filter_Name": "PackPrimaryPhases",
@@ -520,7 +518,7 @@
             "Data Array Name": "FeatureIds2",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Find Surface Features",
         "Filter_Name": "FindSurfaceFeatures",
@@ -543,7 +541,7 @@
             "Data Array Name": "FeatureIds2",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Find Feature Neighbors",
         "Filter_Name": "FindNeighbors",
@@ -574,7 +572,7 @@
             "Data Array Name": "Phases2",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Match Crystallography",
         "Filter_Name": "MatchCrystallography",
@@ -629,7 +627,7 @@
             "Data Array Name": "CrystalStructures",
             "Data Container Name": "StatsGeneratorDataContainer"
         },
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Generate IPF Colors",
         "Filter_Name": "GenerateIPFColors",
@@ -658,7 +656,7 @@
             "Data Array Name": "FeatureIds",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Find Feature Sizes",
         "Filter_Name": "FindSizes",
@@ -686,7 +684,7 @@
             "Data Array Name": "FeatureIds",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Find Feature Shapes",
         "Filter_Name": "FindShapes",
@@ -706,7 +704,7 @@
             "Data Array Name": "FeatureIds",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "6.6.45",
+        "FilterVersion": "6.5.139",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Find Feature Neighbors",
         "Filter_Name": "FindNeighbors",
@@ -725,7 +723,7 @@
             "Data Array Name": "FeatureIds",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "2.0.145",
+        "FilterVersion": "1.2.812",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Create Element Array from Feature Array",
         "Filter_Name": "CopyFeatureArrayToElementArray",
@@ -743,7 +741,7 @@
             "Data Array Name": "FeatureIds",
             "Data Container Name": "SyntheticVolumeDataContainer"
         },
-        "FilterVersion": "2.0.145",
+        "FilterVersion": "1.2.812",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Create Element Array from Feature Array",
         "Filter_Name": "CopyFeatureArrayToElementArray",
@@ -755,7 +753,7 @@
         }
     },
     "17": {
-        "FilterVersion": "2.0.145",
+        "FilterVersion": "1.2.812",
         "Filter_Enabled": true,
         "Filter_Human_Label": "Write DREAM.3D Data File",
         "Filter_Name": "DataContainerWriter",
