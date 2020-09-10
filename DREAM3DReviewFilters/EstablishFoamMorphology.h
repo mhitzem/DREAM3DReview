@@ -702,7 +702,7 @@ private:
   FloatVec3Type m_OneOverHalfPackingRes;
   FloatVec3Type m_PackingRes;
 
-  std::array<int64_t, 3> m_PackingPoints = {0, 0, 0};
+  std::array<int64_t, 3> m_PackingPoints = {{0, 0, 0}};
   int64_t m_TotalPackingPoints = 0;
 
   std::vector<std::vector<float>> m_FeatureSizeDist;
