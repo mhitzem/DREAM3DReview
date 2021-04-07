@@ -38,6 +38,8 @@ set(_PublicFilters
   ITKPairwiseImageRegistration
   ITKResampleImage
   FindMaskNeighbors
+
+  ComputeFeatureEigenstrains
 )
 
 list(LENGTH _PublicFilters PluginNumFilters)
