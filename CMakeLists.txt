@@ -242,6 +242,10 @@ if(NOT APPLE AND UNIX)
   set(${plug_target_name}_install_dest "lib")
 endif()
 
+if(DREAM3D_ANACONDA AND WIN32)
+  set(${plug_target_name}_install_dest "bin")
+endif()
+
 PluginProperties(TARGET_NAME ${plug_target_name}
                 DEBUG_EXTENSION "_debug"
                 VERSION "${DREAM3D_VERSION}"
@@ -268,7 +272,7 @@ endif()
 
 # -------------------------------------------------------------------- 
 # If Python Wrapping is enabled then generate the Python module code 
-if(SIMPL_ENABLE_PYTHON)
+if(SIMPL_WRAP_PYTHON)
   include(${SIMPLProj_SOURCE_DIR}/Wrapping/Python/Binding/CreatePybind11Module.cmake)
 
   CreatePybind11Plugin(PLUGIN_NAME ${PLUGIN_NAME} PLUGIN_TARGET ${plug_target_name})
@@ -291,11 +295,15 @@ if(EXISTS ${${PLUGIN_NAME}_SOURCE_DIR}/ExamplePipelines)
     set(INSTALL_DESTINATION "${DREAM3D_PACKAGE_DEST_PREFIX}/PrebuiltPipelines/Examples")
   endif()
 
-  install(DIRECTORY ${${PLUGIN_NAME}_SOURCE_DIR}/ExamplePipelines/
-          DESTINATION ${INSTALL_DESTINATION}
-          COMPONENT Applications )
-endif()
+  if(DREAM3D_ANACONDA)
+    set(INSTALL_DESTINATION "share/DREAM3D/PrebuiltPipelines/Examples")
+  endif()
 
+  install(DIRECTORY ${${PLUGIN_NAME}_SOURCE_DIR}/ExamplePipelines/
+    DESTINATION ${INSTALL_DESTINATION}
+    COMPONENT Applications
+  )
+endif()
 
 #-------------------------------------------------------------------------------
 #- This installs all the Data files.
@@ -308,15 +316,15 @@ if(EXISTS ${${PLUGIN_NAME}_SOURCE_DIR}/Data)
               COMMENT "Copying ${PLUGIN_NAME} Data Folder into Binary Directory")
   set_target_properties(${PLUGIN_NAME}DataFolderCopy PROPERTIES FOLDER ZZ_COPY_FILES)
 
-  if(APPLE)
-    set(INSTALL_DESTINATION "${DREAM3D_PACKAGE_DEST_PREFIX}/Resources/Data")
-  else()
-    set(INSTALL_DESTINATION "${DREAM3D_PACKAGE_DEST_PREFIX}")
+  set(INSTALL_DESTINATION "Data")
+  if(DREAM3D_ANACONDA)
+    set(INSTALL_DESTINATION "share/DREAM3D/Data")
   endif()
 
-  install(DIRECTORY ${${PLUGIN_NAME}_SOURCE_DIR}/Data
-          DESTINATION .
-          COMPONENT Applications )
+  install(DIRECTORY ${${PLUGIN_NAME}_SOURCE_DIR}/Data/
+    DESTINATION ${INSTALL_DESTINATION}
+    COMPONENT Applications
+  )
 endif()
 # -- Include the GUI Plugin codes
 include(${${PLUGIN_NAME}_SOURCE_DIR}/Gui/CMakeLists.txt)
