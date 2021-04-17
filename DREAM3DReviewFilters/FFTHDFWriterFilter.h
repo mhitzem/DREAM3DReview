@@ -8,8 +8,6 @@
 
 #include <QtCore/QTextStream>
 
-#include "H5Support/H5SupportTypeDefs.h"
-
 #include "SIMPLib/CoreFilters/FileWriter.h"
 #include "SIMPLib/DataArrays/DataArray.hpp"
 #include "SIMPLib/DataArrays/StringDataArray.h"
@@ -26,10 +24,7 @@ class DREAM3DReview_EXPORT FFTHDFWriterFilter : public AbstractFilter
   Q_OBJECT
 
   // Start Python bindings declarations
-  PYB11_BEGIN_BINDINGS(FFTHDFWriterFilter SUPERCLASS AbstractFilter)
-  PYB11_FILTER()
-  PYB11_SHARED_POINTERS(FFTHDFWriterFilter)
-  PYB11_FILTER_NEW_MACRO(FFTHDFWriterFilter)
+  PYB11_CREATE_BINDINGS(FFTHDFWriterFilter SUPERCLASS AbstractFilter)
   PYB11_PROPERTY(QString OutputFile READ getOutputFile WRITE setOutputFile)
   PYB11_PROPERTY(bool WriteEigenstrains READ getWriteEigenstrains WRITE setWriteEigenstrains)
   PYB11_PROPERTY(QString EigenstrainsOutputFile READ getEigenstrainsOutputFile WRITE setEigenstrainsOutputFile)
@@ -37,7 +32,6 @@ class DREAM3DReview_EXPORT FFTHDFWriterFilter : public AbstractFilter
   PYB11_PROPERTY(DataArrayPath CellPhasesArrayPath READ getCellPhasesArrayPath WRITE setCellPhasesArrayPath)
   PYB11_PROPERTY(DataArrayPath CellEulerAnglesArrayPath READ getCellEulerAnglesArrayPath WRITE setCellEulerAnglesArrayPath)
   PYB11_PROPERTY(DataArrayPath CellEigenstrainsArrayPath READ getCellEigenstrainsArrayPath WRITE setCellEigenstrainsArrayPath)
-  PYB11_END_BINDINGS()
   // End Python bindings declarations
 
 public:
@@ -53,7 +47,7 @@ public:
   /**
    * @brief Returns the name of the class for FFTHDFWriterFilter
    */
-  QString getNameOfClass() const override;
+  const QString getNameOfClass() const override;
   /**
    * @brief Returns the name of the class for FFTHDFWriterFilter
    */
@@ -83,25 +77,6 @@ public:
   QString getEigenstrainsOutputFile() const;
   Q_PROPERTY(QString EigenstrainsOutputFile READ getEigenstrainsOutputFile WRITE setEigenstrainsOutputFile)
 
-  /**
-   * @brief Setter property for WritePipeline
-   */
-  void setWritePipeline(bool value);
-  /**
-   * @brief Getter property for WritePipeline
-   * @return Value of WritePipeline
-   */
-  bool getWritePipeline() const;
-
-  /**
-   * @brief Setter property for AppendToExisting
-   */
-  void setAppendToExisting(bool value);
-  /**
-   * @brief Getter property for AppendToExisting
-   * @return Value of AppendToExisting
-   */
-  bool getAppendToExisting() const;
 
   /**
    * @brief Setter property for WriteEigenstrains
@@ -163,21 +138,21 @@ public:
   /**
    * @brief getCompiledLibraryName Reimplemented from @see AbstractFilter class
    */
-  QString getCompiledLibraryName() const override;
+  const QString getCompiledLibraryName() const override;
 
   /**
    * @brief getBrandingString Returns the branding string for the filter, which is a tag
    * used to denote the filter's association with specific plugins
    * @return Branding string
    */
-  QString getBrandingString() const override;
+  const QString getBrandingString() const override;
 
   /**
    * @brief getFilterVersion Returns a version string for this filter. Default
    * value is an empty string.
    * @return
    */
-  QString getFilterVersion() const override;
+  const QString getFilterVersion() const override;
 
   /**
    * @brief newFilterInstance Reimplemented from @see AbstractFilter class
@@ -187,23 +162,23 @@ public:
   /**
    * @brief getGroupName Reimplemented from @see AbstractFilter class
    */
-  QString getGroupName() const override;
+  const QString getGroupName() const override;
 
   /**
    * @brief getSubGroupName Reimplemented from @see AbstractFilter class
    */
-  QString getSubGroupName() const override;
+  const QString getSubGroupName() const override;
 
   /**
    * @brief getUuid Return the unique identifier for this filter.
    * @return A QUuid object.
    */
-  QUuid getUuid() const override;
+  const QUuid getUuid();
 
   /**
    * @brief getHumanLabel Reimplemented from @see AbstractFilter class
    */
-  QString getHumanLabel() const override;
+  const QString getHumanLabel() const override;
 
   /**
    * @brief setupFilterParameters Reimplemented from @see AbstractFilter class
@@ -220,13 +195,41 @@ public:
    */
   void execute() override;
 
+  /**
+  * @brief preflight Reimplemented from @see AbstractFilter class
+  */
+  void preflight() override;
+
+signals:
+  /**
+   * @brief updateFilterParameters Emitted when the Filter requests all the latest Filter parameters
+   * be pushed from a user-facing control (such as a widget)
+   * @param filter Filter instance pointer
+   */
+  void updateFilterParameters(AbstractFilter* filter);
+
+  /**
+   * @brief parametersChanged Emitted when any Filter parameter is changed internally
+   */
+  void parametersChanged();
+
+  /**
+   * @brief preflightAboutToExecute Emitted just before calling dataCheck()
+   */
+  void preflightAboutToExecute();
+
+  /**
+   * @brief preflightExecuted Emitted just after calling dataCheck()
+   */
+  void preflightExecuted();
+
 protected:
   FFTHDFWriterFilter();
 
   /**
    * @brief dataCheck Checks for the appropriate parameter values and availability of arrays
    */
-  void dataCheck() override;
+  void dataCheck();
 
   /**
    * @brief openFile Opens or creates an HDF5 file to write data into
@@ -235,32 +238,14 @@ protected:
    */
   void openFile(QString file, hid_t& fileId, bool append = false);
 
-  /**
-   * @brief writePipeline Writes the existing pipeline to the HDF5 file
-   * @return
-   */
-  int writePipeline();
-
-  /**
-   * @brief writeXdmfHeader Writes the Xdmf header
-   * @param out QTextStream for output
-   */
-  void writeXdmfHeader(QTextStream& out);
-
-  /**
-   * @brief writeXdmfFooter Writes the Xdmf footer
-   * @param out QTextStream for output
-   */
-  void writeXdmfFooter(QTextStream& out);
-
 private:
-  std::weak_ptr<DataArray<int32_t>> m_FeatureIdsPtr;
+  std::weak_ptr<Int32ArrayType> m_FeatureIdsPtr;
   int32_t* m_FeatureIds = nullptr;
-  std::weak_ptr<DataArray<int32_t>> m_CellPhasesPtr;
+  std::weak_ptr<Int32ArrayType> m_CellPhasesPtr;
   int32_t* m_CellPhases = nullptr;
-  std::weak_ptr<DataArray<float>> m_CellEulerAnglesPtr;
+  std::weak_ptr<FloatArrayType> m_CellEulerAnglesPtr;
   float* m_CellEulerAngles = nullptr;
-  std::weak_ptr<DataArray<float>> m_CellEigenstrainsPtr;
+  std::weak_ptr<FloatArrayType> m_CellEigenstrainsPtr;
   float* m_CellEigenstrains = nullptr;
 
   QString m_OutputFile = {""};

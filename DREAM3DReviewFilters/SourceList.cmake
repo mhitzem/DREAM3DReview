@@ -40,6 +40,7 @@ set(_PublicFilters
   FindMaskNeighbors
 
   ComputeFeatureEigenstrains
+  FFTHDFWriterFilter
 )
 
 list(LENGTH _PublicFilters PluginNumFilters)
