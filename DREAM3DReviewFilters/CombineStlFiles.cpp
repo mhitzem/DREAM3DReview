@@ -67,7 +67,7 @@ void CombineStlFiles::initialize()
 void CombineStlFiles::setupFilterParameters()
 {
   FilterParameterVectorType parameters;
-  parameters.push_back(SIMPL_NEW_INPUT_PATH_FP("Path to STL Files", StlFilesPath, FilterParameter::Category::Parameter, CombineStlFiles, "", ""));
+  parameters.push_back(SIMPL_NEW_INPUT_PATH_FP("Path to STL Files", StlFilesPath, FilterParameter::Category::Parameter, CombineStlFiles));
   parameters.push_back(SIMPL_NEW_STRING_FP("Data Container", TriangleDataContainerName, FilterParameter::Category::CreatedArray, CombineStlFiles));
   parameters.push_back(SeparatorFilterParameter::Create("Face Data", FilterParameter::Category::CreatedArray));
   parameters.push_back(SIMPL_NEW_AM_WITH_LINKED_DC_FP("Face Attribute Matrix", FaceAttributeMatrixName, TriangleDataContainerName, FilterParameter::Category::CreatedArray, CombineStlFiles));
