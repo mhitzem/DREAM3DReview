@@ -343,6 +343,11 @@ int32_t ReadBinaryCTNorthStar::readBinaryCTFiles()
     zShift += dataFileInput.second;
     fileIndex++;
     fclose(f);
+
+    if(getCancel())
+    {
+      break;
+    }
   }
 
   return error;
