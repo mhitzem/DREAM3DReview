@@ -177,7 +177,8 @@ void FindArrayStatistics::dataCheck()
     return;
   }
 
-  QVector<DataArrayPath> dataArrayPaths;
+  QVector<DataArrayPath> outputDataArrayPaths;
+  QVector<DataArrayPath> inputDataArrayPaths;
 
   m_InputArrayPtr = getDataContainerArray()->getPrereqIDataArrayFromPath(this, getSelectedArrayPath());
 
@@ -186,7 +187,7 @@ void FindArrayStatistics::dataCheck()
     return;
   }
 
-  // dataArrayPaths.push_back(getSelectedArrayPath());
+  inputDataArrayPaths.push_back(getSelectedArrayPath());
 
   if(m_InputArrayPtr.lock()->getNumberOfComponents() != 1)
   {
@@ -230,24 +231,24 @@ void FindArrayStatistics::dataCheck()
 
   if(getComputeByIndex())
   {
-    m_FeatureIdsPtr = getDataContainerArray()->getPrereqArrayFromPath<DataArray<int32_t>>(this, getFeatureIdsArrayPath(), cDims);
+    m_FeatureIdsPtr = getDataContainerArray()->getPrereqArrayFromPath<Int32ArrayType>(this, getFeatureIdsArrayPath(), cDims);
     if(m_FeatureIdsPtr.lock())
     {
       m_FeatureIds = m_FeatureIdsPtr.lock()->getPointer(0);
     }
     if(getErrorCode() >= 0)
     {
-      dataArrayPaths.push_back(getFeatureIdsArrayPath());
+      inputDataArrayPaths.push_back(getFeatureIdsArrayPath());
     }
   }
 
-  EXECUTE_FUNCTION_TEMPLATE(this, createCompatibleArrays, m_InputArrayPtr.lock(), dataArrayPaths)
+  EXECUTE_FUNCTION_TEMPLATE(this, createCompatibleArrays, m_InputArrayPtr.lock(), outputDataArrayPaths)
 
   if(m_FindHistogram)
   {
     std::vector<size_t> cDims_List = {static_cast<size_t>(m_NumBins)};
     DataArrayPath path(getDestinationAttributeMatrix().getDataContainerName(), getDestinationAttributeMatrix().getAttributeMatrixName(), getHistogramArrayName());
-    m_HistogramListPtr = getDataContainerArray()->createNonPrereqArrayFromPath<DataArray<float>>(this, path, 0, cDims_List, "", DataArrayID37);
+    m_HistogramListPtr = getDataContainerArray()->createNonPrereqArrayFromPath<FloatArrayType>(this, path, 0, cDims_List, "", DataArrayID37);
     if(getErrorCode() < 0)
     {
       return;
@@ -256,14 +257,14 @@ void FindArrayStatistics::dataCheck()
 
   if(getUseMask())
   {
-    m_MaskPtr = getDataContainerArray()->getPrereqArrayFromPath<DataArray<bool>>(this, getMaskArrayPath(), cDims);
+    m_MaskPtr = getDataContainerArray()->getPrereqArrayFromPath<BoolArrayType>(this, getMaskArrayPath(), cDims);
     if(m_MaskPtr.lock())
     {
       m_Mask = m_MaskPtr.lock()->getPointer(0);
     }
     if(getErrorCode() >= 0)
     {
-      dataArrayPaths.push_back(getMaskArrayPath());
+      inputDataArrayPaths.push_back(getMaskArrayPath());
     }
   }
 
@@ -275,18 +276,15 @@ void FindArrayStatistics::dataCheck()
       setErrorCondition(-11003, ss);
     }
     DataArrayPath path(getSelectedArrayPath().getDataContainerName(), getSelectedArrayPath().getAttributeMatrixName(), getStandardizedArrayName());
-    m_StandardizedPtr = getDataContainerArray()->createNonPrereqArrayFromPath<DataArray<float>>(this, path, 0, cDims, "", DataArrayID39);
-    if(m_StandardizedPtr.lock())
-    {
-      m_Standardized = m_StandardizedPtr.lock()->getPointer(0);
-    }
+    m_StandardizedPtr = getDataContainerArray()->createNonPrereqArrayFromPath<FloatArrayType>(this, path, 0, cDims, "", DataArrayID39);
     if(getErrorCode() >= 0)
     {
-      dataArrayPaths.push_back(path);
+      inputDataArrayPaths.push_back(path);
     }
   }
 
-  getDataContainerArray()->validateNumberOfTuples(this, dataArrayPaths);
+  getDataContainerArray()->validateNumberOfTuples(this, inputDataArrayPaths);
+  getDataContainerArray()->validateNumberOfTuples(this, outputDataArrayPaths);
 }
 
 // -----------------------------------------------------------------------------
@@ -525,7 +523,7 @@ public:
         if(m_Arrays[7])
         {
           std::vector<float> vals = findHistogram(m_FeatureDataMap[i], m_HistMin, m_HistMax, m_HistFullRange, m_NumBins);
-          std::shared_ptr<DataArray<float>> histArray = std::dynamic_pointer_cast<DataArray<float>>(m_Arrays[7]);
+          std::shared_ptr<FloatArrayType> histArray = std::dynamic_pointer_cast<FloatArrayType>(m_Arrays[7]);
           histArray->setTuple(i, vals);
         }
       }
@@ -625,7 +623,7 @@ void findStatisticsImpl(bool length, bool min, bool max, bool mean, bool median,
     if(arrays[7])
     {
       std::vector<float> vals = findHistogram(data, histmin, histmax, histfullrange, numBins);
-      std::shared_ptr<DataArray<float>> histArray = std::dynamic_pointer_cast<DataArray<float>>(arrays[7]);
+      std::shared_ptr<FloatArrayType> histArray = std::dynamic_pointer_cast<FloatArrayType>(arrays[7]);
       histArray->setTuple(0, vals);
     }
   }
@@ -661,7 +659,7 @@ void findStatistics(IDataArray::Pointer source, Int32ArrayType::Pointer featureI
         featureValueMap[featureIdsPtr[i]].push_back(dataPtr[i]);
       }
     }
-
+    
 #ifdef SIMPL_USE_PARALLEL_ALGORITHMS
     bool doParallel = true;
 #endif

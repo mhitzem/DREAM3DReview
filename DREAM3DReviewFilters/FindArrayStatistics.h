@@ -490,30 +490,21 @@ protected:
 
 private:
   IDataArrayWkPtrType m_MinimumPtr;
-  void* m_Minimum = nullptr;
   IDataArrayWkPtrType m_MaximumPtr;
-  void* m_Maximum = nullptr;
   IDataArrayWkPtrType m_InputArrayPtr;
   void* m_InputArray = nullptr;
 
-  std::weak_ptr<DataArray<size_t>> m_LengthPtr;
-  size_t* m_Length = nullptr;
-  std::weak_ptr<DataArray<float>> m_MeanPtr;
-  float* m_Mean = nullptr;
-  std::weak_ptr<DataArray<float>> m_MedianPtr;
-  float* m_Median = nullptr;
-  std::weak_ptr<DataArray<float>> m_StandardDeviationPtr;
-  float* m_StandardDeviation = nullptr;
-  std::weak_ptr<DataArray<float>> m_SummationPtr;
-  float* m_Summation = nullptr;
-  std::weak_ptr<DataArray<float>> m_StandardizedPtr;
-  float* m_Standardized = nullptr;
+  std::weak_ptr<SizeTArrayType> m_LengthPtr;
+  std::weak_ptr<FloatArrayType> m_MeanPtr;
+  std::weak_ptr<FloatArrayType> m_MedianPtr;
+  std::weak_ptr<FloatArrayType> m_StandardDeviationPtr;
+  std::weak_ptr<FloatArrayType> m_SummationPtr;
+  std::weak_ptr<FloatArrayType> m_StandardizedPtr;
   std::weak_ptr<DataArray<int32_t>> m_FeatureIdsPtr;
   int32_t* m_FeatureIds = nullptr;
-  std::weak_ptr<DataArray<bool>> m_MaskPtr;
+  std::weak_ptr<BoolArrayType> m_MaskPtr;
   bool* m_Mask = nullptr;
-  std::weak_ptr<DataArray<float>> m_HistogramListPtr;
-  float* m_HistogramList;
+  std::weak_ptr<FloatArrayType> m_HistogramListPtr;
 
   // Histogram Related Parameters
   double m_MinRange = {};
@@ -536,7 +527,7 @@ private:
   DataArrayPath m_DestinationAttributeMatrix = {"", "", ""};
   DataArrayPath m_MaskArrayPath = {"", "", "Mask"};
 
-  QString m_HistogramArrayName = {};
+  QString m_HistogramArrayName = {"Histogram"};
   QString m_LengthArrayName = {"Length"};
   QString m_MinimumArrayName = {"Minimum"};
   QString m_MaximumArrayName = {"Maximum"};
