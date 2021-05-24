@@ -119,8 +119,8 @@ Tensor4DType find_eshelby(double a, double b, double c, double nu, bool ellipsoi
   double eps = 1e-5;
   if((a - b > eps || b - c > eps) && ellipsoidal)
   {
-    double IVector[3] = {0};
-    double IArray[3][3] = {0};
+    double IVector[3] = {0, 0, 0};
+    double IArray[3][3] = {{0.0, 0.0, 0.0},{0.0, 0.0, 0.0},{0.0, 0.0, 0.0}};
     double aa = std::pow(a, 2);
     double bb = std::pow(b, 2);
     double cc = std::pow(c, 2);
