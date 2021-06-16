@@ -41,7 +41,6 @@ CombineStlFiles::CombineStlFiles()
 , m_TriangleDataContainerName(SIMPL::Defaults::TriangleDataContainerName)
 , m_FaceAttributeMatrixName(SIMPL::Defaults::FaceAttributeMatrixName)
 , m_FaceNormalsArrayName(SIMPL::FaceData::SurfaceMeshFaceNormals)
-, m_FileList(QFileInfoList())
 {
   initialize();
 }

@@ -235,9 +235,7 @@ inline bool operator==(const Vertex& vert0, const Vertex& vert1)
 
 struct Polygon
 {
-  Polygon()
-  {
-  }
+  Polygon() = default;
 
   Polygon(const std::vector<Vertex>& verts)
   {
@@ -246,14 +244,7 @@ struct Polygon
 
   bool valid() const
   {
-    if(vertices.size() == 0)
-    {
-      return false;
-    }
-    else
-    {
-      return true;
-    }
+    return vertices.size() != 0;
     // return false ? vertices.empty() : true;
   }
 
@@ -366,9 +357,7 @@ struct Polygon
 
 struct Polygons
 {
-  Polygons()
-  {
-  }
+  Polygons() = default;
 
   Polygons(const std::vector<Polygon>& polys)
   {
@@ -381,10 +370,8 @@ struct Polygons
     {
       return false;
     }
-    else
-    {
-      return polygons[p].valid();
-    }
+
+    return polygons[p].valid();
   }
 
   std::vector<Polygon> polygons;
@@ -393,9 +380,7 @@ struct Polygons
 class Polynomial
 {
 public:
-  Polynomial()
-  {
-  }
+  Polynomial() = default;
 
   Polynomial(const std::vector<std::vector<float>>& xs, const std::vector<std::vector<float>>& ys, const uint8_t& o)
   {

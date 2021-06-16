@@ -91,7 +91,7 @@ void FindMinkowskiBouligandDimension::dataCheck()
   std::vector<size_t> cDims(1, 1);
 
   m_MaskPtr = getDataContainerArray()->getPrereqArrayFromPath<DataArray<bool>>(this, getMaskArrayPath(), cDims);
-  if(nullptr != m_MaskPtr.lock().get())
+  if(nullptr != m_MaskPtr.lock())
   {
     m_Mask = m_MaskPtr.lock()->getPointer(0);
   }
@@ -108,7 +108,7 @@ void FindMinkowskiBouligandDimension::dataCheck()
   DataArrayPath path(getMaskArrayPath().getDataContainerName(), getAttributeMatrixName(), getMinkowskiBouligandDimensionArrayName());
 
   m_MinkowskiBouligandDimensionPtr = getDataContainerArray()->createNonPrereqArrayFromPath<DataArray<double>>(this, path, 0, cDims);
-  if(nullptr != m_MinkowskiBouligandDimensionPtr.lock().get())
+  if(nullptr != m_MinkowskiBouligandDimensionPtr.lock())
   {
     m_MinkowskiBouligandDimension = m_MinkowskiBouligandDimensionPtr.lock()->getPointer(0);
   }
@@ -170,7 +170,7 @@ void FindMinkowskiBouligandDimension::execute()
     dims[2] = 1;
   }
 
-  auto is_pow_2 = [](size_t x) -> bool { return !(x & (x - 1)); };
+  auto is_pow_2 = [](size_t x) -> bool { return (x & (x - 1)) == 0u; };
 
   auto next_pow_2 = [&](size_t x) -> size_t {
     if(is_pow_2(x))
@@ -188,7 +188,7 @@ void FindMinkowskiBouligandDimension::execute()
 
   auto floor_log2 = [](size_t x) -> size_t {
     size_t exp = 0;
-    while(x >>= 1)
+    while(x >>= 1 != 0u)
     {
       ++exp;
     }

@@ -282,7 +282,7 @@ protected:
    * @param p
    * @return
    */
-  static char rayIntersectsPlane(const float d, const float* q, const float* r, float* p);
+  static char rayIntersectsPlane(float d, const float* q, const float* r, float* p);
 
   /**
    * @brief updateEdgeInstancePointers

@@ -44,8 +44,7 @@
 //
 // -----------------------------------------------------------------------------
 MicPhase::MicPhase()
-: m_PhaseName("")
-, m_PhaseIndex(1)
+: m_PhaseIndex(1)
 {
   m_LatticeConstants.resize(6);
 }

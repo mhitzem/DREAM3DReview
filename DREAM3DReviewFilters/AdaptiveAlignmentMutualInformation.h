@@ -90,7 +90,7 @@ public:
    */
   static QString ClassName();
 
-  virtual ~AdaptiveAlignmentMutualInformation();
+  ~AdaptiveAlignmentMutualInformation() override;
 
   /**
    * @brief Setter property for MisorientationTolerance

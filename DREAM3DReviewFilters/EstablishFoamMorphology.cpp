@@ -3356,7 +3356,7 @@ void EstablishFoamMorphology::find_euclideandistmap()
       {
         m_NearestNeighbors[a * 3 + 0] = -1, m_NearestNeighbors[a * 3 + 1] = -1, m_NearestNeighbors[a * 3 + 2] = -1;
       }
-      if(coordination.size() >= 1)
+      if(!coordination.empty())
       {
         m_GBEuclideanDistances[a] = 0.0f, m_NearestNeighbors[a * 3 + 0] = coordination[0], m_NearestNeighbors[a * 3 + 1] = -1, m_NearestNeighbors[a * 3 + 2] = -1;
       }

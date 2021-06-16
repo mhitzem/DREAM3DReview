@@ -89,7 +89,6 @@ class ReadMicDataPrivate
 ReadMicDataPrivate::ReadMicDataPrivate(ReadMicData* ptr)
 : q_ptr(ptr)
 , m_InputFile_Cache("")
-, m_TimeStamp_Cache(QDateTime())
 {
 }
 

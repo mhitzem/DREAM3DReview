@@ -102,7 +102,7 @@ public:
    */
   static QString ClassName();
 
-  virtual ~ParaDisReader();
+  ~ParaDisReader() override;
   /**
    * @brief Setter property for EdgeDataContainerName
    */

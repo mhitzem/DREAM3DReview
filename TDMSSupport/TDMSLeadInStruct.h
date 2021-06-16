@@ -1,7 +1,7 @@
 #ifndef _tdmsleadinstruct_h_
 #define _tdmsleadinstruct_h_
 
-#include <stdint.h>
+#include <cstdint>
 
 #pragma pack(push)
 #pragma pack(1)

@@ -20,9 +20,7 @@ TDMSSegment::TDMSSegment(std::ifstream& filestream, uint64_t currentSegment)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-TDMSSegment::~TDMSSegment()
-{
-}
+TDMSSegment::~TDMSSegment() = default;
 
 // -----------------------------------------------------------------------------
 //
@@ -124,14 +122,7 @@ void TDMSSegment::readMetaData(std::unordered_map<std::string, TDMSObject::Point
     {
       auto iter = std::find_if_not(std::begin(objects), std::end(objects), [&objectsExtended](decltype(*std::begin(objects))& val) -> bool {
         auto pathIter = std::find(std::begin(objectsExtended), std::end(objectsExtended), val.first);
-        if(pathIter == objectsExtended.end())
-        {
-          return false;
-        }
-        else
-        {
-          return true;
-        }
+        return pathIter != objectsExtended.end();
       });
       if(iter == std::end(objects))
       {

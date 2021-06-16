@@ -47,7 +47,7 @@ TriangleGeom::Pointer Delaunay2D::triangulate()
 {
   initialize();
 
-  if(m_Observer)
+  if(m_Observer != nullptr)
   {
     connect(this, SIGNAL(filterGeneratedMessage(const PipelineMessage&)), m_Observer, SLOT(broadcastPipelineMessage(const PipelineMessage&)));
   }
@@ -388,7 +388,7 @@ TriangleGeom::Pointer Delaunay2D::triangulate()
 
   for(size_t i = 0; i < triUse.size(); i++)
   {
-    if(triUse[i])
+    if(triUse[i] != 0)
     {
       numGoodTris++;
     }
@@ -412,7 +412,7 @@ TriangleGeom::Pointer Delaunay2D::triangulate()
 
   for(auto i = 0; i < triList.size(); i++)
   {
-    if(triUse[i])
+    if(triUse[i] != 0)
     {
       m_Delaunay->getTriangleVertices(i, triVerts);
       triPtr[3 * triIter + 0] = triVerts[0];
@@ -496,13 +496,13 @@ int64_t Delaunay2D::findTriangle(double x[3], int64_t tri, double tol, int64_t n
     } // outside this edge
   }   // for each edge
 
-  if(inside) // all edges have tested positive
+  if(inside != 0) // all edges have tested positive
   {
     nei[0] = (-1);
     return tri;
   }
 
-  else if(!inside && (fabs(minProj) < del2D_tolerance)) // on edge
+  if(!inside && (fabs(minProj) < del2D_tolerance)) // on edge
   {
     nei[0] = m_Delaunay->getTriangleEdgeNeighbor(nei[1], nei[2], tri);
     return tri;
@@ -548,7 +548,7 @@ void Delaunay2D::checkEdge(int64_t point, double x[3], int64_t p1, int64_t p2, i
     m_Delaunay->getVertexCoordinates(oppositeVert, x3);
 
     // see whether point is in circumcircle
-    if(inCircumcircle(x3, x, x1, x2))
+    if(inCircumcircle(x3, x, x1, x2) != 0)
     { // swap diagonal
       m_Delaunay->removeLinkFromTriangle(p1, tri);
       m_Delaunay->removeLinkFromTriangle(p2, neighbor);
@@ -630,7 +630,7 @@ void Delaunay2D::fixupBoundaryTriangles(int64_t numVerts, TriMesh::VertexCoordLi
 
     for(size_t i = 0; i < ncells; i++)
     {
-      if(triUse[neighbors[i]])
+      if(triUse[neighbors[i]] != 0)
       {
         isConnected = true;
         break;
@@ -787,10 +787,8 @@ double Delaunay2D::circumcircle(double a[2], double b[2], double c[2], double ce
   {
     return std::numeric_limits<double>::max();
   }
-  else
-  {
-    return sum;
-  }
+
+  return sum;
 }
 
 // -----------------------------------------------------------------------------
@@ -810,10 +808,8 @@ int32_t Delaunay2D::inCircumcircle(double p[3], double a[3], double b[3], double
   {
     return 1;
   }
-  else
-  {
-    return 0;
-  }
+
+  return 0;
 }
 
 // -----------------------------------------------------------------------------

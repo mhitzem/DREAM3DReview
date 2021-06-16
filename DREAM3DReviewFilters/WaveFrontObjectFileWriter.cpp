@@ -52,7 +52,6 @@
 //
 // -----------------------------------------------------------------------------
 WaveFrontObjectFileWriter::WaveFrontObjectFileWriter()
-: AbstractFilter()
 {
   initialize();
 }

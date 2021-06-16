@@ -16,9 +16,7 @@ TDMSDataTypeFactory::TDMSDataTypeFactory()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-TDMSDataTypeFactory::~TDMSDataTypeFactory()
-{
-}
+TDMSDataTypeFactory::~TDMSDataTypeFactory() = default;
 
 // -----------------------------------------------------------------------------
 //

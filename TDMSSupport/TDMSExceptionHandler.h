@@ -33,9 +33,7 @@ public:
     constructMessageWithInformation();
   }
 
-  virtual ~NonFatalTDMSException()
-  {
-  }
+  virtual ~NonFatalTDMSException() = default;
 
   NonFatalTDMSException(const NonFatalTDMSException& exc)
   {
@@ -68,10 +66,8 @@ private:
     {
       return;
     }
-    else
-    {
-      m_MessageWithInformation += ("\n" + m_Information);
-    }
+
+    m_MessageWithInformation += ("\n" + m_Information);
   }
 
   std::string m_Message;
@@ -90,9 +86,7 @@ public:
     constructMessageWithInformation();
   }
 
-  virtual ~FatalTDMSException()
-  {
-  }
+  virtual ~FatalTDMSException() = default;
 
   FatalTDMSException(const FatalTDMSException& exc)
   {
@@ -125,10 +119,8 @@ private:
     {
       return;
     }
-    else
-    {
-      m_MessageWithInformation += ("\n" + m_Information);
-    }
+
+    m_MessageWithInformation += ("\n" + m_Information);
   }
 
   std::string m_Message;

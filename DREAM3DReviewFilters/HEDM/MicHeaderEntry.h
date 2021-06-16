@@ -110,7 +110,7 @@ protected:
 
 private:
   T m_value = static_cast<T>(0);
-  std::string m_key = {""};
+  std::string m_key;
 
 public:
   MicHeaderEntry(const MicHeaderEntry&) = delete;            // Copy Constructor Not Implemented
@@ -176,8 +176,8 @@ protected:
   MicStringHeaderEntry() = default;
 
 private:
-  std::string m_value = {""};
-  std::string m_key = {""};
+  std::string m_value;
+  std::string m_key;
 
 public:
   MicStringHeaderEntry(const MicStringHeaderEntry&) = delete;            // Copy Constructor Not Implemented

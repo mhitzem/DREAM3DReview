@@ -12,9 +12,7 @@ TDMSProperty::TDMSProperty(TDMSDataType::Pointer type, IDataArray::Pointer value
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-TDMSProperty::~TDMSProperty()
-{
-}
+TDMSProperty::~TDMSProperty() = default;
 
 // -----------------------------------------------------------------------------
 //

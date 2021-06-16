@@ -83,7 +83,7 @@ public:
    */
   static QString ClassName();
 
-  virtual ~AdaptiveAlignmentFeature();
+  ~AdaptiveAlignmentFeature() override;
 
   /**
    * @brief Setter property for GoodVoxelsArrayPath

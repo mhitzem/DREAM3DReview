@@ -19,7 +19,7 @@ public:
   using ConstWeakPointer = std::weak_ptr<const Self>;
   static Pointer NullPointer();
 
-  virtual ~Delaunay2D();
+  ~Delaunay2D() override;
 
   static Pointer New(TriMesh::VertexCoordList vertices, double offset, double tolerance, double alpha, Observable* observable = nullptr)
   {
