@@ -7,7 +7,7 @@ import simpl_test_dirs as sd
 import simplpy
 import orientationanalysispy
 import genericpy
-import statisticspy
+import statstoolboxpy
 import syntheticbuildingpy as syntheticbuilding
 import dream3dreviewpy
 
@@ -76,7 +76,7 @@ def start_test():
     assert err == 0, f'PackPrimaryPhases ErrorCondition: {err}'
 
     # Find Feature Neighbors
-    err = statisticspy.find_neighbors(dca, simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellFeatureData', ''),
+    err = statstoolboxpy.find_neighbors(dca, simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellFeatureData', ''),
                                       'SharedSurfaceAreaList', 'NeighborList',
                                       simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellData',
                                                           'FeatureIds'),
@@ -114,7 +114,7 @@ def start_test():
     assert err == 0, f'FindFeatureCentroids ErrorCondition: {err}'
 
     # Find Feature Sizes #1
-    err = statisticspy.find_sizes(dca, simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellFeatureData', ''),
+    err = statstoolboxpy.find_sizes(dca, simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellFeatureData', ''),
                                   simpl.DataArrayPath('SyntheticVolumeDataContainer',
                                                       'CellData', 'FeatureIds'),
                                   'Volumes2', 'EquivalentDiameters', 'NumElements', False)
@@ -190,7 +190,7 @@ def start_test():
     assert err == 0, f'GenerateIPFColors ErrorCondition: {err}'
 
     # Find Feature Sizes #2
-    err = statisticspy.find_sizes(dca, simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellFeatureData', ''),
+    err = statstoolboxpy.find_sizes(dca, simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellFeatureData', ''),
                                   simpl.DataArrayPath('SyntheticVolumeDataContainer',
                                                       'CellData', 'FeatureIds'),
                                   'Volumes2', 'EquivalentDiameters', 'NumElements', False)
@@ -227,7 +227,7 @@ def start_test():
     assert err == 0, f'FindFeatureCentroids ErrorCondition: {err}'
 
     # Find Feature Neighborhoods
-    err = statisticspy.find_neighborhoods(dca, 'NeighborhoodList', 1,
+    err = statstoolboxpy.find_neighborhoods(dca, 'NeighborhoodList', 1,
                                           simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellFeatureData',
                                                               'EquivalentDiameters'),
                                           simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellFeatureData',
@@ -238,7 +238,7 @@ def start_test():
     assert err == 0, f'FindNeighborhoods ErrorCondition: {err}'
 
     # Find Feature Neighbors #2
-    err = statisticspy.find_neighbors(dca, simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellFeatureData', ''),
+    err = statstoolboxpy.find_neighbors(dca, simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellFeatureData', ''),
                                       'SharedSurfaceAreaList', 'NeighborList',
                                       simpl.DataArrayPath('SyntheticVolumeDataContainer', 'CellData', 'FeatureIds'),
                                       '', 'NumNeighbors', 'SurfaceFeatures', False, False)
