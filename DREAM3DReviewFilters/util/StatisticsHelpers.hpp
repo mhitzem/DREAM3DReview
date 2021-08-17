@@ -46,9 +46,31 @@ auto computeSum(const Container& source)
       return std::accumulate(std::cbegin(source), std::cend(source), static_cast<uint64_t>(0));
     }
   }
-  else
+  else // Use Kahan Summation for float/double
   {
-    return std::accumulate(std::cbegin(source), std::cend(source), 0.0);
+    double sum = 0.0;
+
+    // Variable to store the error
+    double c = 0.0;
+
+    // Loop to iterate over the array
+    for(const T& f : source)
+    {
+      double y = static_cast<double>(f) - c;
+      double t = sum + y;
+
+      // Algebraically, c is always 0
+      // when t is replaced by its
+      // value from the above expression.
+      // But, when there is a loss,
+      // the higher-order y is cancelled
+      // out by subtracting y from c and
+      // all that remains is the
+      // lower-order error in c
+      c = (t - sum) - y;
+      sum = t;
+    }
+    return sum;
   }
 }
 
@@ -74,7 +96,7 @@ bool findMean(const C<bool, Ts...>& source)
     return false;
   }
   size_t count = std::count(std::cbegin(source), std::cend(source), true);
-  return true ? count >= (source.size() - count) : false;
+  return count >= (source.size() - count);
 }
 
 // -----------------------------------------------------------------------------
@@ -128,7 +150,7 @@ bool findStdDeviation(const C<bool, Ts...>& source)
     return false;
   }
   size_t count = std::count(std::cbegin(source), std::cend(source), true);
-  return true ? count >= (source.size() - count) : false;
+  return count >= (source.size() - count);
 }
 
 // -----------------------------------------------------------------------------
