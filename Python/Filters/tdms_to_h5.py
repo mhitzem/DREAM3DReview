@@ -24,16 +24,7 @@ PART_END_TIME_KEY: str = 'PartEndTime'
 TDMS_GROUP_NAME_KEY: str = 'TDMS_GroupName'
 VERTICES_KEY: str = 'Vertices'
 
-def tdms2h5(self) -> None:
-
-  input_dir = Path(self.input_folder)
-  output_dir = Path(self.output_folder)
-  area_offset = self.area_offset
-  intensity_offset = self.intensity_offset
-  laser_offset = self.laser_offset
-  prefix = self.prefix
-  groups = self.group
-  verbose = False
+def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, intensity_offset: int, laser_offset: int, groups: List[str] = [], verbose: bool = False) -> None:
 
   largest_offset = max(area_offset, intensity_offset)
 
@@ -149,11 +140,6 @@ def _write_tdms_properties(h5_group: h5py.Group, tdms_dict: Dict[str, Any], repl
     else:
       h5_group.attrs[key] = value
 
-class InitType(IntEnum):
-  MANUAL = 0
-  RANDOM = 1
-  RANDOM_WITH_RANGE = 2
-
 class TDMStoH5(Filter):
   def __init__(self) -> None:
     self.area_offset: int = 0
@@ -265,7 +251,7 @@ class TDMStoH5(Filter):
     return (0, 'Success')
 
   def _execute_impl(self, dca: DataContainerArray, delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
-    tdms2h5(self)
+    tdms2h5(Path(self.input_folder), Path(self.output_folder), self.prefix, self.area_offset, self.intensity_offset, self.laser_offset, self.group, False)
 
     return (0, 'Success')
 
