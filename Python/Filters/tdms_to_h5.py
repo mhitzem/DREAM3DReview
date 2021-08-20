@@ -11,7 +11,7 @@ from enum import IntEnum
 from typing import List, Tuple, Union
 
 from dream3d.Filter import Filter, FilterDelegatePy
-from dream3d.simpl import DataContainerArray, StringFilterParameter, InputPathFilterParameter, FilterDelegateCpp, FilterParameter, IntFilterParameter, DataArrayPath, MultiDataArraySelectionFilterParameter, IGeometry, AttributeMatrix, LinkedChoicesFilterParameter, DoubleFilterParameter, RangeFilterParameter, SeparatorFilterParameter
+from dream3d.simpl import *
 
 FILE_VERSION: int = 3
 VERSION_KEY: str = 'Version'
@@ -24,13 +24,13 @@ PART_END_TIME_KEY: str = 'PartEndTime'
 TDMS_GROUP_NAME_KEY: str = 'TDMS_GroupName'
 VERTICES_KEY: str = 'Vertices'
 
-def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, intensity_offset: int, laser_offset: int, groups: List[str] = [], verbose: bool = False) -> None:
+def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, intensity_offset: int, laser_offset: int, groups: List[str] = [], verbose: bool = False, delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> None:
 
   largest_offset = max(area_offset, intensity_offset)
 
   if not output_dir.exists():
     if verbose:
-      print(f'Creating directory \"{output_dir}\"')
+      delegate.notifyStatusMessage(f'Creating directory = \"{output_dir}\"')
     output_dir.mkdir(parents=True)
 
   paths_generator: Generator[(Path, None, None)] = input_dir.glob('*.[Tt][Dd][Mm][Ss]')
@@ -109,6 +109,10 @@ def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, in
           y_dataset.attrs['Units'] = 'μm'
 
           # Resulting slices will be aligned with the same number of data points for each channel
+          
+    if not h5_files:
+      delegate.notifyStatusMessage(f' No TDMS files located')
+      return -1
 
     slice_indices = sorted(slice_indices)
 
@@ -124,10 +128,10 @@ def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, in
       dataset.attrs['Column2'] = 'NumVertices'
 
     if verbose:
-      print('\nWrote files:')
+      delegate.notifyStatusMessage('\nWrote files:')
       h5_file: h5py.File
       for h5_file in h5_files.values():
-        print(f'  \"{h5_file.filename}\"')
+        delegate.notifyStatusMessage(f' \"{h5_file.filename}\"')
 
 def _write_tdms_properties(h5_group: h5py.Group, tdms_dict: Dict[str, Any], replacements: Dict[str, str]) -> None:
   key: str
@@ -228,7 +232,7 @@ class TDMStoH5(Filter):
       IntFilterParameter('Laser Offset', 'laser_offset', self.laser_offset, FilterParameter.Category.Parameter, self._set_laser_offset, self._get_laser_offset, -1),
       InputPathFilterParameter('Input Folder', 'Input Folder', '', FilterParameter.Category.Parameter,
                                self._set_input_folder, self._get_input_folder, -1),
-      InputPathFilterParameter('Output Folder', 'Output Folder', '', FilterParameter.Category.Parameter,
+      OutputPathFilterParameter('Output Folder', 'Output Folder', '', FilterParameter.Category.Parameter,
                                self._set_output_folder, self._get_output_folder, -1),
       StringFilterParameter('Prefix', 'prefix', self.prefix, FilterParameter.Category.Parameter, self._set_prefix, self._get_prefix, -1),
       StringFilterParameter('Group', 'group', self.group, FilterParameter.Category.Parameter, self._set_group,
@@ -246,12 +250,14 @@ class TDMStoH5(Filter):
       return (-302, 'Input path does not exist')
 
     if not os.path.exists(self.output_folder):
-      return (-303, 'Output path does not exist')
+      os.mkdir(output_dir)
+      return (-303, 'Output path does not exist, creating new directory')
 
     return (0, 'Success')
 
   def _execute_impl(self, dca: DataContainerArray, delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
-    tdms2h5(Path(self.input_folder), Path(self.output_folder), self.prefix, self.area_offset, self.intensity_offset, self.laser_offset, self.group, False)
+    if tdms2h5(Path(self.input_folder), Path(self.output_folder), self.prefix, self.area_offset, self.intensity_offset, self.laser_offset, self.group, True, delegate) == -1:
+      return (-1, 'could not create HDF5 files')
 
     return (0, 'Success')
 
