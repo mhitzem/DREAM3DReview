@@ -24,14 +24,9 @@ PART_END_TIME_KEY: str = 'PartEndTime'
 TDMS_GROUP_NAME_KEY: str = 'TDMS_GroupName'
 VERTICES_KEY: str = 'Vertices'
 
-def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, intensity_offset: int, laser_offset: int, groups: List[str] = [], verbose: bool = False, delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> None:
+def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, intensity_offset: int, laser_offset: int, groups: List[str] = [],  status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> None:
 
   largest_offset = max(area_offset, intensity_offset)
-
-  if not output_dir.exists():
-    if verbose:
-      delegate.notifyStatusMessage(f'Creating directory = \"{output_dir}\"')
-    output_dir.mkdir(parents=True)
 
   paths_generator: Generator[(Path, None, None)] = input_dir.glob('*.[Tt][Dd][Mm][Ss]')
   regex_name: Pattern[AnyStr] = re.compile(fr'{prefix}(\d+)')
@@ -47,11 +42,10 @@ def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, in
       paths.append(path)
 
     if not len(prefix) == 0 and not paths:
-      delegate.notifyStatusMessage(f' Prefix not in file name(s)')
+      status_delegate.notifyStatusMessage(f' Prefix not in file name(s)')
 
     for path in paths:
-      if verbose:
-        print(f'Converting \"{path}\"')
+      print(f'Converting \"{path}\"')
 
       match: Match[AnyStr] = regex_name.search(path.stem)
       slice_index = int(match.group(1))
@@ -65,7 +59,7 @@ def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, in
         for ind, group in enumerate(tdmsFile.groups()):
           if groups and not any(re.match(pattern, group.name) for pattern in groups):
             if ind == len(tdmsFile.groups())-1:
-              delegate.notifyStatusMessage(f' Group(s) not located')
+              status_delegate.notifyStatusMessage(f' Group(s) not located')
             continue
 
           output_file_path = output_dir / f'{group.name}.h5'
@@ -121,7 +115,7 @@ def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, in
           # Resulting slices will be aligned with the same number of data points for each channel
           
     if not h5_files:
-      delegate.notifyStatusMessage(f' No TDMS files located')
+      status_delegate.notifyStatusMessage(f' No TDMS files located')
       return -1
 
     slice_indices = sorted(slice_indices)
@@ -136,12 +130,11 @@ def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, in
       dataset.attrs['Column0'] = 'SliceIndex'
       dataset.attrs['Column1'] = 'LayerThickness (μm)'
       dataset.attrs['Column2'] = 'NumVertices'
-
-    if verbose:
-      delegate.notifyStatusMessage('\nWrote files:')
-      h5_file: h5py.File
-      for h5_file in h5_files.values():
-        delegate.notifyStatusMessage(f' \"{h5_file.filename}\"')
+      
+    status_delegate.notifyStatusMessage('\nWrote files:')
+    h5_file: h5py.File
+    for h5_file in h5_files.values():
+      status_delegate.notifyStatusMessage(f' \"{h5_file.filename}\"')
 
 def _write_tdms_properties(h5_group: h5py.Group, tdms_dict: Dict[str, Any], replacements: Dict[str, str]) -> None:
   key: str
@@ -249,7 +242,7 @@ class TDMStoH5(Filter):
                            self._get_group, -1)
     ]
 
-  def data_check(self, dca: DataContainerArray, delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
+  def data_check(self, dca: DataContainerArray, status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
     if not self.input_folder:
       return (-5550, 'An input folder must be selected')
 
@@ -257,16 +250,19 @@ class TDMStoH5(Filter):
       return (-301, 'An output folder must be selected')
 
     if not os.path.exists(self.input_folder):
-      return (-302, 'Input path does not exist')
+      return (-302, f' Input path {self.input_folder} does not exist')
 
     if not os.path.exists(self.output_folder):
-      os.mkdir(output_dir)
-      return (-303, 'Output path does not exist, creating new directory')
+      status_delegate.setWarningCondition(1, f' Output folder {self.output_folder} does not exist; creating a new folder')
 
     return (0, 'Success')
 
-  def _execute_impl(self, dca: DataContainerArray, delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
-    if tdms2h5(Path(self.input_folder), Path(self.output_folder), self.prefix, self.area_offset, self.intensity_offset, self.laser_offset, self.group, True, delegate) == -1:
+  def _execute_impl(self, dca: DataContainerArray, status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
+    
+    if not os.path.exists(self.output_folder):
+      os.mkdir(self.output_folder)
+      
+    if tdms2h5(Path(self.input_folder), Path(self.output_folder), self.prefix, self.area_offset, self.intensity_offset, self.laser_offset, self.group, status_delegate) == -1:
       return (-1, 'could not create HDF5 files')
 
     return (0, 'Success')
