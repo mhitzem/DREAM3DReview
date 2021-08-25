@@ -41,7 +41,15 @@ def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, in
     slice_indices: List[int] = []
 
     path: Path
+      
+    paths = []
     for path in filter(lambda item: regex_name.search(item.stem), paths_generator):
+      paths.append(path)
+
+    if not len(prefix) == 0 and not paths:
+      delegate.notifyStatusMessage(f' Prefix not in file name(s)')
+
+    for path in paths:
       if verbose:
         print(f'Converting \"{path}\"')
 
@@ -54,8 +62,10 @@ def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, in
         bitgain_os_2: float = tdmsFile.properties['Bitgain OS 2']
 
         group: nptdms.TdmsGroup
-        for group in tdmsFile.groups():
+        for ind, group in enumerate(tdmsFile.groups()):
           if groups and not any(re.match(pattern, group.name) for pattern in groups):
+            if ind == len(tdmsFile.groups())-1:
+              delegate.notifyStatusMessage(f' Group(s) not located')
             continue
 
           output_file_path = output_dir / f'{group.name}.h5'
