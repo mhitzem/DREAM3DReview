@@ -60,7 +60,7 @@ MultiInputFileFilterParameter"""
 from typing import List, Tuple, Union
 from dream3d.Filter import Filter, FilterDelegatePy
 from dream3d.simpl import BooleanFilterParameter, DataContainerArray, StringFilterParameter, InputFileFilterParameter, FilterDelegateCpp, FilterParameter, IntFilterParameter, DataArraySelectionFilterParameter, DataArrayPath
-from dream3d.simpl import InputPathFilterParameter, FloatFilterParameter
+from dream3d.simpl import InputPathFilterParameter, FloatFilterParameter, StackFileListInfo, FileListInfoFilterParameter
 
 class D3DReviewTestFilter(Filter):
   def __init__(self) -> None:
@@ -71,6 +71,18 @@ class D3DReviewTestFilter(Filter):
     self.input_file_param:str = "/No/Path/anywhere.txt"
     self.input_path_param:str = "/Some/Folder/Somewhere"
     self.float_param:float = 33.44
+    # The arguments to StackFileListInfo are the following:
+    #param paddingDigits The number of padding digits use to generate the file names
+    #param ordering How to order the files: Low to High = 0; High to Low = 1
+    #param startIndex The starting index
+    #param endIndex The ending index (inclusive)
+    #param incrementIndex How much to increment index each time through the loop
+    #param inputPath The initial input file path (String)
+    #param filePrefix The File prefix (String)
+    #param fileSuffix The File Suffix (String)
+    #param fileExtension The file extnsion without the '.' chacter
+
+    self.stack_info_param:StackFileListInfo = StackFileListInfo(0,0,0,0,1, 'InputPath', 'File Prefix_', '_Suffix', 'tdms')
 
   def _set_float_param(self, value: float) -> None:
       self.float_param = value
@@ -113,6 +125,11 @@ class D3DReviewTestFilter(Filter):
   def _set_input_path_param(self, value: str) -> None:
       self.input_path_param = value
 
+  def _get_stack_info_param(self) -> StackFileListInfo:
+      return self.stack_info_param
+
+  def _set_stack_info_param(self, value) -> None:
+      self.stack_info_param = value
   
   @staticmethod
   def name() -> str:
@@ -152,7 +169,9 @@ class D3DReviewTestFilter(Filter):
         InputFileFilterParameter('Input File', 'input_file_param', self.input_file_param, 
                                     FilterParameter.Category.Parameter, self._set_input_file, self._get_input_file,'*.ang', 'EDAX Ang', -1),
         InputPathFilterParameter('Input Directory', 'input_path_param', self.input_path_param, 
-                                    FilterParameter.Category.Parameter, self._set_input_path_param, self._get_input_path_param, -1)
+                                    FilterParameter.Category.Parameter, self._set_input_path_param, self._get_input_path_param, -1),
+        FileListInfoFilterParameter('List of TDMS Files', 'stack_info_param', self.stack_info_param,
+                                    FilterParameter.Category.Parameter, self._set_stack_info_param, self._get_stack_info_param)
     ]
 
   def data_check(self, dca: DataContainerArray, delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
