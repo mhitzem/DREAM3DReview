@@ -23,29 +23,49 @@ PART_START_TIME_KEY: str = 'PartStartTime'
 PART_END_TIME_KEY: str = 'PartEndTime'
 TDMS_GROUP_NAME_KEY: str = 'TDMS_GroupName'
 VERTICES_KEY: str = 'Vertices'
+  
+ def get_file_list(end_index: int, file_extension: str, file_prefix: str, file_suffix: str, increment: int, input_path: str, ordering: int, padding_digits: int, start_index: int, status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> None:
+  file_list = []
 
-def tdms2h5(input_dir: Path, output_dir: Path, prefix: str, area_offset: int, intensity_offset: int, laser_offset: int, groups: List[str] = [],  status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> None:
+  index = 0
+  i = 0
+  while i < (end_index - start_index) + 1:
+
+    if(ordering):
+      index = end_index - i
+    else:
+      index = start_index + i
+
+    file = input_path + '/' + file_prefix + str(index).zfill(padding_digits) + file_suffix + '.' + file_extension
+    file_list.append(file)
+    i = i + increment
+
+  return file_list
+
+def tdms2h5(file_info: StackFileListInfo, file_list: List, output_dir: Path, area_offset: int, intensity_offset: int, laser_offset: int, groups: List[str] = [], status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> None:
 
   largest_offset = max(area_offset, intensity_offset)
-
-  paths_generator: Generator[(Path, None, None)] = input_dir.glob('*.[Tt][Dd][Mm][Ss]')
-  regex_name: Pattern[AnyStr] = re.compile(fr'{prefix}(\d+)')
 
   with ExitStack() as exitStack:
     h5_files: Dict[str, h5py.File] = {}
     slice_indices: List[int] = []
 
+    regex_name: Pattern[AnyStr] = re.compile(fr'{file_info.FilePrefix}(\d+)')
+
     path: Path
-      
+
     paths = []
-    for path in filter(lambda item: regex_name.search(item.stem), paths_generator):
-      paths.append(path)
+    for file in file_list:
+      paths.append(Path(file))
 
-    if not len(prefix) == 0 and not paths:
-      status_delegate.notifyStatusMessage(f' Prefix not in file name(s)')
+    status_delegate.notifyStatusMessage(f' Files are {file_list}')
 
+    paths_size = len(paths)
+    path_ind = 1
     for path in paths:
-      print(f'Converting \"{path}\"')
+      status_delegate.notifyStatusMessage(f'Converting {path_ind} of {paths_size}: \"{path}\"')
+      path_ind = path_ind + 1
+      status_delegate.notifyStatusMessage(f'Converting \"{path}\"')
 
       match: Match[AnyStr] = regex_name.search(path.stem)
       slice_index = int(match.group(1))
@@ -152,10 +172,9 @@ class TDMStoH5(Filter):
     self.area_offset: int = 0
     self.intensity_offset: int = 0
     self.laser_offset: int = 0
-    self.input_folder: str = ''
     self.output_folder: str = ''
-    self.prefix: str = ''
     self.group: str = ''
+    self.stack_info_param: StackFileListInfo = StackFileListInfo(0, 0, 0, 0, 1, '', 'Prefix_', '_Suffix', 'tdms')
 
   def _set_area_offset(self, value: int) -> None:
     self.area_offset = value
@@ -175,29 +194,23 @@ class TDMStoH5(Filter):
   def _get_laser_offset(self) -> int:
     return self.laser_offset
 
-  def _set_input_folder(self, value: str) -> None:
-    self.input_folder = value
-
-  def _get_input_folder(self) -> str:
-    return self.input_folder
-
   def _set_output_folder(self, value: str) -> None:
     self.output_folder = value
 
   def _get_output_folder(self) -> str:
     return self.output_folder
 
-  def _set_prefix(self, value: str) -> None:
-    self.prefix = value
-
-  def _get_prefix(self) -> str:
-    return self.prefix
-
   def _set_group(self, value: str) -> None:
     self.group = value
 
   def _get_group(self) -> str:
     return self.group
+  
+  def _get_stack_info_param(self) -> StackFileListInfo:
+    return self.stack_info_param
+
+  def _set_stack_info_param(self, value) -> None:
+    self.stack_info_param = value
 
   @staticmethod
   def name() -> str:
@@ -233,23 +246,22 @@ class TDMStoH5(Filter):
       IntFilterParameter('Area Offset', 'area_offset', self.area_offset, FilterParameter.Category.Parameter, self._set_area_offset, self._get_area_offset, -1),
       IntFilterParameter('Intensity Offset', 'intensity_offset', self.intensity_offset, FilterParameter.Category.Parameter, self._set_intensity_offset, self._get_intensity_offset, -1),
       IntFilterParameter('Laser Offset', 'laser_offset', self.laser_offset, FilterParameter.Category.Parameter, self._set_laser_offset, self._get_laser_offset, -1),
-      InputPathFilterParameter('Input Folder', 'Input Folder', '', FilterParameter.Category.Parameter,
-                               self._set_input_folder, self._get_input_folder, -1),
       OutputPathFilterParameter('Output Folder', 'Output Folder', '', FilterParameter.Category.Parameter,
                                self._set_output_folder, self._get_output_folder, -1),
-      StringFilterParameter('Prefix', 'prefix', self.prefix, FilterParameter.Category.Parameter, self._set_prefix, self._get_prefix, -1),
       StringFilterParameter('Group', 'group', self.group, FilterParameter.Category.Parameter, self._set_group,
                            self._get_group, -1)
+      FileListInfoFilterParameter('File List', 'filelist', self.stack_info_param, FilterParameter.Category.Parameter,
+                           self._set_stack_info_param, self._get_stack_info_param)
     ]
 
   def data_check(self, dca: DataContainerArray, status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
-    if not self.input_folder:
+    if not self.stack_info_param.InputPath:
       return (-5550, 'An input folder must be selected')
 
     if not self.output_folder:
       return (-301, 'An output folder must be selected')
 
-    if not os.path.exists(self.input_folder):
+    if not os.path.exists(self.stack_info_param.InputPath):
       return (-302, f' Input path {self.input_folder} does not exist')
 
     if not os.path.exists(self.output_folder):
@@ -259,10 +271,12 @@ class TDMStoH5(Filter):
 
   def _execute_impl(self, dca: DataContainerArray, status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
     
+    file_list = get_file_list(self.stack_info_param.EndIndex, self.stack_info_param.FileExtension, self.stack_info_param.FilePrefix, self.stack_info_param.FileSuffix, self.stack_info_param.IncrementIndex, self.stack_info_param.InputPath, self.stack_info_param.Ordering, self.stack_info_param.PaddingDigits, self.stack_info_param.StartIndex)
+
     if not os.path.exists(self.output_folder):
       os.mkdir(self.output_folder)
-      
-    if tdms2h5(Path(self.input_folder), Path(self.output_folder), self.prefix, self.area_offset, self.intensity_offset, self.laser_offset, self.group, status_delegate) == -1:
+
+    if tdms2h5(self.stack_info_param, file_list, Path(self.output_folder), self.area_offset, self.intensity_offset, self.laser_offset, self.group, status_delegate) == -1:
       return (-1, 'could not create HDF5 files')
 
     return (0, 'Success')
