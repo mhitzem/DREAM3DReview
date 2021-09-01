@@ -24,7 +24,7 @@ PART_END_TIME_KEY: str = 'PartEndTime'
 TDMS_GROUP_NAME_KEY: str = 'TDMS_GroupName'
 VERTICES_KEY: str = 'Vertices'
   
- def get_file_list(end_index: int, file_extension: str, file_prefix: str, file_suffix: str, increment: int, input_path: str, ordering: int, padding_digits: int, start_index: int, status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> None:
+def get_file_list(end_index: int, file_extension: str, file_prefix: str, file_suffix: str, increment: int, input_path: str, ordering: int, padding_digits: int, start_index: int, status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> None:
   file_list = []
 
   index = 0
@@ -58,14 +58,11 @@ def tdms2h5(file_info: StackFileListInfo, file_list: List, output_dir: Path, are
     for file in file_list:
       paths.append(Path(file))
 
-    status_delegate.notifyStatusMessage(f' Files are {file_list}')
-
     paths_size = len(paths)
     path_ind = 1
     for path in paths:
       status_delegate.notifyStatusMessage(f'Converting {path_ind} of {paths_size}: \"{path}\"')
       path_ind = path_ind + 1
-      status_delegate.notifyStatusMessage(f'Converting \"{path}\"')
 
       match: Match[AnyStr] = regex_name.search(path.stem)
       slice_index = int(match.group(1))
@@ -249,7 +246,7 @@ class TDMStoH5(Filter):
       OutputPathFilterParameter('Output Folder', 'Output Folder', '', FilterParameter.Category.Parameter,
                                self._set_output_folder, self._get_output_folder, -1),
       StringFilterParameter('Group', 'group', self.group, FilterParameter.Category.Parameter, self._set_group,
-                           self._get_group, -1)
+                           self._get_group, -1),
       FileListInfoFilterParameter('File List', 'filelist', self.stack_info_param, FilterParameter.Category.Parameter,
                            self._set_stack_info_param, self._get_stack_info_param)
     ]
