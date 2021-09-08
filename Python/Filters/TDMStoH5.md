@@ -1,8 +1,8 @@
-# @Convert TDMS to H5@ #
+# Convert TDMS to H5 #
 
 ## Group (Subgroup) ##
 
-@Example@ (@Sub Example@)
+Example(Sub Example)
 
 ## Description ##
 
