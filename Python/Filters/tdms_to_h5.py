@@ -1,3 +1,5 @@
+#This filter takes a series of TDMS files and converts them to individual part files, where each part is stored in an HDF5 File.
+
 import numpy as np
 import os
 import h5py
