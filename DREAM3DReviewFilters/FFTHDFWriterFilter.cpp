@@ -361,7 +361,7 @@ AbstractFilter::Pointer FFTHDFWriterFilter::newFilterInstance(bool copyFilterPar
 // -----------------------------------------------------------------------------
 QString FFTHDFWriterFilter::getCompiledLibraryName() const
 {
-  return MASSIFUtilitiesConstants::MASSIFUtilitiesBaseName;
+  return DREAM3DReviewConstants::DREAM3DReviewBaseName;
 }
 
 // -----------------------------------------------------------------------------

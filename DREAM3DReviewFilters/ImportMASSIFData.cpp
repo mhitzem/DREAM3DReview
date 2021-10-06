@@ -385,7 +385,7 @@ AbstractFilter::Pointer ImportMASSIFData::newFilterInstance(bool copyFilterParam
 // -----------------------------------------------------------------------------
 QString ImportMASSIFData::getCompiledLibraryName() const
 {
-  return MASSIFUtilitiesConstants::MASSIFUtilitiesBaseName;
+  return DREAM3DReviewConstants::DREAM3DReviewBaseName;
 }
 
 // -----------------------------------------------------------------------------
