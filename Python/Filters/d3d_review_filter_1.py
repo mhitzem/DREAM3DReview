@@ -171,7 +171,7 @@ class D3DReviewTestFilter(SIMPLFilter):
     req.amTypes = [simpl.AttributeMatrix.Type.Cell]
     req.daTypes = ["float", "double", "int32_t"]
     req.componentDimensions = [VectorSizeT([1]), VectorSizeT([3])]
-    
+
     return [
         simpl.IntFilterParameter('Integer', 'int_param', self.int_param, simpl.FilterParameter.Category.Parameter, self._set_int, self._get_int, -1),
         simpl.DataArraySelectionFilterParameter('Data Array Path Selection', 'dap_param', self.dap_param, simpl.FilterParameter.Category.RequiredArray, self._set_dap, self._get_dap, req, -1),
