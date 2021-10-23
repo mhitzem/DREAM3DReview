@@ -1,29 +1,25 @@
 import numpy as np
-import os
 
-from contextlib import ExitStack
-from pathlib import Path
-from typing import Any, AnyStr, Dict, Generator, List, Match, Pattern
+from typing import List
 from enum import IntEnum
 from typing import List, Tuple, Union
 
 from dream3d.Filter import Filter, FilterDelegatePy
-import dream3d.simpl as simpl
-import dream3d.simplpy as simplpy
+from dream3d.simpl import NumericTypes
+from dream3d.simpl import *
 
 class NormalizeGrayscale(Filter):
   def __init__(self) -> None:
-    self.data_array: DataArrayPath = simpl.DataArrayPath('', '', '')
-    self.arr_name: str = ''
-    self.choice: bool = False
+    self.selected_data_array_path: DataArrayPath = DataArrayPath('', '', '')
+    self.create_data_array: bool = False
     self.axes: int = 0
-    self.new_arr: DataArrayPath = simpl.DataArrayPath('', '', '')
+    self.created_data_array_path: DataArrayPath = DataArrayPath('', '', '')
 
-  def _set_data_array(self, value: simpl.DataArrayPath) -> None:
-    self.data_array = value
+  def _set_selected_data_array_path(self, value: DataArrayPath) -> None:
+    self.selected_data_array_path = value
 
-  def _get_data_array(self) -> simpl.DataArrayPath:
-    return self.data_array
+  def _get_selected_data_array_path(self) -> DataArrayPath:
+    return self.selected_data_array_path
 
   def _set_axes(self, value: int) -> None:
     self.axes = value
@@ -31,27 +27,21 @@ class NormalizeGrayscale(Filter):
   def _get_axes(self) -> int:
     return self.axes
 
-  def _set_choice(self, value: bool) -> None:
-    self.choice = value
+  def _set_create_data_array(self, value: bool) -> None:
+    self.create_data_array = value
 
-  def _get_choice(self) -> bool:
-    return self.choice
+  def _get_create_data_array(self) -> bool:
+    return self.create_data_array
 
-  def _set_arr_name(self, value: str) -> None:
-    self.arr_name = value
+  def _set_created_data_array_path(self, value: DataArrayPath) -> None:
+    self.created_data_array_path = value
 
-  def _get_arr_name(self) -> str:
-    return self.arr_name
-
-  def _set_new_arr(self, value: simpl.DataArrayPath) -> None:
-    self.new_arr = value
-
-  def _get_new_arr(self) -> simpl.DataArrayPath:
-    return self.new_arr
+  def _get_created_data_array_path(self) -> DataArrayPath:
+    return self.created_data_array_path
 
   @staticmethod
   def name() -> str:
-    return 'Grayscale Normalizer'
+    return 'Grayscale Normalizer [Python]'
 
   @staticmethod
   def uuid() -> str:
@@ -59,15 +49,15 @@ class NormalizeGrayscale(Filter):
 
   @staticmethod
   def group_name() -> str:
-    return 'Example'
+    return 'Processing'
 
   @staticmethod
   def sub_group_name() -> str:
-    return 'Sub Example'
+    return 'Normalization'
 
   @staticmethod
   def human_label() -> str:
-    return 'Normalize Grayscale Values'
+    return 'Normalize Grayscale Values [Python]'
 
   @staticmethod
   def version() -> str:
@@ -77,92 +67,136 @@ class NormalizeGrayscale(Filter):
   def compiled_lib_name() -> str:
     return 'Python'
 
-  def setup_parameters(self) -> List[simpl.FilterParameter]:
-    req = simpl.DataArraySelectionFilterParameter.RequirementType([simpl.IGeometry.Type.Image], [], [], [])
+  def setup_parameters(self) -> List[FilterParameter]:
+    # Create a DataArraySelectionFilterParameter Requirement Type that only takes the following:
+    # Image Geometry
+    # AttributeMatrix must be a CellType
+    # DataArray Component dimensions are 1, i.e., a scalar value
+    req = DataArraySelectionFilterParameter.RequirementType()
+    req.dcGeometryTypes = [IGeometry.Type.Image]
+    req.amTypes = [AttributeMatrix.Type.Cell]
+    # req.daTypes = ["float", "double", "int32_t"]
+    req.componentDimensions = [VectorSizeT([1])]
+
     return [
-      simpl.DataArraySelectionFilterParameter('Select Data Array', 'data_array', self.data_array, simpl.FilterParameter.Category.RequiredArray, self._set_data_array, self._get_data_array, req, -1),
-      simpl.ChoiceFilterParameter('Slice Axis', 'axes', self.axes, simpl.FilterParameter.Category.Parameter, self._set_axes,
+      DataArraySelectionFilterParameter('Input Data Array', 'selected_data_array_path', self.selected_data_array_path, FilterParameter.Category.RequiredArray, self._set_data_array, self._get_data_array, req, -1),
+      ChoiceFilterParameter('Slice Axis', 'axes', self.axes, FilterParameter.Category.Parameter, self._set_axes,
                                  self._get_axes, ["x", "y", "z"], False, -1),
-      simpl.LinkedBooleanFilterParameter('Create New Array', 'create_new_array', self.choice, simpl.FilterParameter.Category.Parameter, self._set_choice, self._get_choice, ['new_array'], -1),
-      simpl.DataArrayCreationFilterParameter('New Array', 'new_array', self.new_arr, simpl.FilterParameter.Category.CreatedArray, self._set_new_arr, self._get_new_arr, simpl.DataArrayCreationFilterParameter.RequirementType(), -1)
+      LinkedBooleanFilterParameter('Create New Array', 'create_new_array', self.create_data_array, FilterParameter.Category.Parameter, self._set_create_data_array, self._get_create_data_array, ['new_array'], -1),
+      DataArrayCreationFilterParameter('New Array', 'new_array', self.created_data_array_path, FilterParameter.Category.CreatedArray, self._set_created_data_array_path, self._get_created_data_array_path, DataArrayCreationFilterParameter.RequirementType(), -1)
     ]
 
-  def data_check(self, dca: simpl.DataContainerArray, status_delegate: Union[simpl.FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
-    dc = dca.getDataContainer(self.data_array)
-    am = dca.getAttributeMatrix(self.data_array)
-    selected_data_array = am.getAttributeArray(self.data_array.DataArrayName)
-    #selected_data_array.getNumComponents != 1 -> could be req
+  def data_check(self, dca: DataContainerArray, status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
+    # Methodically check for each level of the selected data array path.
+    # Ensure the proper geometry is available
+    # Ensure the number of components of the input data array is 1
+    # Error messages should give as much information as possible. users will rely on the
+    #  error message to debug their pipelines, sometimes from the command line so printing
+    #  out the DataArrayPath that was passed in is helpful for the user.
+    # Error Codes: Should start at a unique value somewhere between 10,000 and 100,000 and then just increment up from there
 
-    if not dca.doesAttributeMatrixExist(self.data_array):
-      return (-5550, 'One data array must be selected')
-
-    if type(dc.Geometry.getDimensions()) != simpl.SizeVec3:
-      return (-301, 'Not a 3D array')
+    dc:DataContainer =  dca.getDataContainer(self.selected_data_array_path)
+    if dc is None:
+      return -61550, 'DataContainer does not exist: ' + self.selected_data_array_path.DataContainerName
 
     if not dc.Geometry:
-      return (-302, 'DataContainer has no geometry')
+      return (-61551, 'Selected DataContainer has no geometry.')
 
-    if dc.Geometry.getGeometryType() != simpl.IGeometry.Type.Image:
-      return (-303, 'Wrong geometry type')
+    if dc.Geometry.getGeometryType() != IGeometry.Type.Image:
+      return (-61552, 'This filter requires a DataContainer with an ImageGeometry. Selected DataContainer has ' + dc.Geometry.getGeometryTypeAsString())
+    
+    am:AttributeMatrix = dca.getAttributeMatrix(self.selected_data_array_path)
+    if am is None:
+      return -61553, 'AttributeMatrix does not exist: ' + self.selected_data_array_path.AttributeMatrixName
 
-    if self.choice:
-      udims = dc.Geometry.getDimensions()
-      shape = [np.int64(udims[2]), np.int64(udims[1]), np.int64(udims[0])]
-      arr_dtype = am.getAttributeArray(self.data_array).dtype
+    selected_data_array:IDataArray = am.getAttributeArray(self.selected_data_array_path.DataArrayName)
+    if selected_data_array is None:
+      return -61554, 'DataArray does not exist: ' + self.selected_data_array_path.DataArrayName
 
-      new_data_array = np.zeros(shape, dtype = arr_dtype)
+    if selected_data_array.getNumberOfComponents() != 1:
+      return -61555, 'Selected DataArray must have a single component: ' + str(selected_data_array.getNumberOfComponents())
 
-    # Create a simpl.DataArray object to hold the vertices by reference
-      #switch statement for dtype
-      new_simpl_array = simpl.UInt8Array(new_data_array, self.new_arr.DataArrayName)
-      am.addOrReplaceAttributeArray(new_simpl_array)
+    if not self.create_data_array:
+      return -61556, 'New Array must be created'
+
+    # If we are creating an array, what other options are there, then we need to create the array (but not allocate the memory during preflight)
+    # using the createNonPrereqArrayFromPath should do this for us.
+    if self.create_data_array:
+      arr_dtype = selected_data_array.dtype
+      if arr_dtype == "int8":
+        dca.createNonPrereqArrayFromPath(status_delegate, NumericTypes.Int8, self.created_data_array_path, 0, VectorSizeT([1]))
+      elif arr_dtype == "uint8":
+        dca.createNonPrereqArrayFromPath(status_delegate, NumericTypes.UInt8, self.created_data_array_path, 0, VectorSizeT([1]))
+      elif arr_dtype == "int16":
+        dca.createNonPrereqArrayFromPath(status_delegate, NumericTypes.Int16, self.created_data_array_path, 0, VectorSizeT([1]))
+      elif arr_dtype == "uint16":
+        dca.createNonPrereqArrayFromPath(status_delegate, NumericTypes.UInt16, self.created_data_array_path, 0, VectorSizeT([1]))
+      elif arr_dtype == "int32":
+        dca.createNonPrereqArrayFromPath(status_delegate, NumericTypes.Int32, self.created_data_array_path, 0, VectorSizeT([1]))
+      elif arr_dtype == "uint32":
+        dca.createNonPrereqArrayFromPath(status_delegate, NumericTypes.UInt32, self.created_data_array_path, 0, VectorSizeT([1]))
+      elif arr_dtype == "int64":
+        dca.createNonPrereqArrayFromPath(status_delegate, NumericTypes.Int64, self.created_data_array_path, 0, VectorSizeT([1]))
+      elif arr_dtype == "uint64":
+        dca.createNonPrereqArrayFromPath(status_delegate, NumericTypes.UInt64, self.created_data_array_path, 0, VectorSizeT([1]))
+      elif arr_dtype == "float32":
+        dca.createNonPrereqArrayFromPath(status_delegate, NumericTypes.Float, self.created_data_array_path, 0, VectorSizeT([1]))
+      elif arr_dtype == "float64":
+        dca.createNonPrereqArrayFromPath(status_delegate, NumericTypes.Double, self.created_data_array_path, 0, VectorSizeT([1]))
+      elif arr_dtype == "bool":
+        return -61556, 'Bool type arrays are not supported as inputs to this algorithm'
 
     return (0, 'Success')
 
-  def _execute_impl(self, dca: simpl.DataContainerArray, status_delegate: Union[simpl.FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
-    dc = dca.getDataContainer(self.data_array)
-    udims = dc.Geometry.getDimensions()
-    shape = [np.int64(udims[2]), np.int64(udims[1]), np.int64(udims[0])]
+  def _execute_impl(self, dca: DataContainerArray, status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
+    
+    # The super class will rerun preflight but this time all of the arrays will get allocated. If preflight _still_
+    # caused an error the function will *not* get called at all so in theory everything should be available without
+    # much error checking going on if the data check is detailed enough to catch all of the possible errors.
 
-    da = dca.getAttributeMatrix(self.data_array).getAttributeArray(self.data_array)
-    data = da.npview()
-    data = np.reshape(data, shape)
+    # Grab out all of the needed objects from the DataContainerArray
+    dc:DataContainer = dca.getDataContainer(self.selected_data_array_path)
+    am:AttributeMatrix = dc.getAttributeMatrix(self.selected_data_array_path)
+    selected_data_array:IDataArray = am.getAttributeArray(self.selected_data_array_path)
+    created_data_array:IDataArray = am.getAttributeArray(self.created_data_array_path)
 
-    if self.choice:
-      #simpl_data_array
-      da_new = dca.getAttributeMatrix(self.new_arr).getAttributeArray(self.new_arr)
-      #npv_data_array
-      corrected_data = da_new.npview()
-      corrected_data = np.reshape(corrected_data, shape)
+    # Note that the dimensions come back as X, Y, Z (Fastest to slowest) so we will need to invert the order if using them in a numpy array
+    # Note however that the data is actually stored in the SIMPL DataArray in the correct order
+    imageGeomDims:SizeVec3 = dc.Geometry.getDimensions()
+    shape = [np.int64(imageGeomDims[2]), np.int64(imageGeomDims[1]), np.int64(imageGeomDims[0])]
 
-    arr = []
+    npv_selected_data = selected_data_array.npview()
+    npv_selected_data = np.reshape(npv_selected_data, shape)
 
+    # Get a numpy view into the data and then reshape the numpy array
+    corrected_data = created_data_array.npview()
+    corrected_data = np.reshape(corrected_data, shape)
+
+    # Get the average of the entire data set
+    arr_avg = np.average(npv_selected_data)
+    print(f'arr_avg: {arr_avg}')
     slice_axis = self.axes
-    shape = data.shape
-
-    arr_avg = np.average(data)
-
     #slices are in x-axis
     if slice_axis == 0:
-      layer_avg = np.average(data, axis=(1,2))
+      layer_avg = np.average(npv_selected_data, axis=(0,1))
       correction_factor = layer_avg/arr_avg
-      corrected_data = data / correction_factor[:, None, None]
+      corrected_data = npv_selected_data / correction_factor[None, None, :]
 
     #slices are in y-axis
     elif slice_axis == 1:
-      layer_avg = np.average(data, axis=(0,2))
+      layer_avg = np.average(npv_selected_data, axis=(0,2))
       correction_factor = layer_avg / arr_avg
-      corrected_data = data/correction_factor[None, :, None]
+      corrected_data = npv_selected_data/correction_factor[None, :, None]
 
     #slices are in z-axis
     elif slice_axis == 2:
-      layer_avg = np.average(data, axis=(0,1))
+      layer_avg = np.average(npv_selected_data, axis=(1,2))
       correction_factor = layer_avg / arr_avg
-      corrected_data = data / correction_factor[None, None, :]
+      corrected_data = npv_selected_data / correction_factor[:, None, None]
 
-    if not self.choice:
-      data = corrected_data
-
+    # if not self.create_data_array:
+    #   data = corrected_data
+      
     return (0, 'Success')
 
 
