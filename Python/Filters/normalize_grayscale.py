@@ -79,7 +79,7 @@ class NormalizeGrayscale(Filter):
     req.componentDimensions = [VectorSizeT([1])]
 
     return [
-      DataArraySelectionFilterParameter('Input Data Array', 'selected_data_array_path', self.selected_data_array_path, FilterParameter.Category.RequiredArray, self._set_data_array, self._get_data_array, req, -1),
+      DataArraySelectionFilterParameter('Input Data Array', 'selected_data_array_path', self.selected_data_array_path, FilterParameter.Category.RequiredArray, self._set_selected_data_array_path, self._get_selected_data_array_path, req, -1),
       ChoiceFilterParameter('Slice Axis', 'axes', self.axes, FilterParameter.Category.Parameter, self._set_axes,
                                  self._get_axes, ["x", "y", "z"], False, -1),
       LinkedBooleanFilterParameter('Create New Array', 'create_new_array', self.create_data_array, FilterParameter.Category.Parameter, self._set_create_data_array, self._get_create_data_array, ['new_array'], -1),
@@ -150,15 +150,12 @@ class NormalizeGrayscale(Filter):
 
   def _execute_impl(self, dca: DataContainerArray, status_delegate: Union[FilterDelegateCpp, FilterDelegatePy] = FilterDelegatePy()) -> Tuple[int, str]:
     
-    # The super class will rerun preflight but this time all of the arrays will get allocated. If preflight _still_
-    # caused an error the function will *not* get called at all so in theory everything should be available without
-    # much error checking going on if the data check is detailed enough to catch all of the possible errors.
-
-    # Grab out all of the needed objects from the DataContainerArray
     dc:DataContainer = dca.getDataContainer(self.selected_data_array_path)
     am:AttributeMatrix = dc.getAttributeMatrix(self.selected_data_array_path)
     selected_data_array:IDataArray = am.getAttributeArray(self.selected_data_array_path)
     created_data_array:IDataArray = am.getAttributeArray(self.created_data_array_path)
+    status_delegate.notifyStatusMessage(f" Selected D3D data array is {selected_data_array}")
+
 
     # Note that the dimensions come back as X, Y, Z (Fastest to slowest) so we will need to invert the order if using them in a numpy array
     # Note however that the data is actually stored in the SIMPL DataArray in the correct order
@@ -167,36 +164,39 @@ class NormalizeGrayscale(Filter):
 
     npv_selected_data = selected_data_array.npview()
     npv_selected_data = np.reshape(npv_selected_data, shape)
+    selected_data_dtype = npv_selected_data.dtype
 
     # Get a numpy view into the data and then reshape the numpy array
-    corrected_data = created_data_array.npview()
-    corrected_data = np.reshape(corrected_data, shape)
+    npv_created_data_array = created_data_array.npview()
+    npv_created_data_array = np.reshape(npv_created_data_array, shape)
 
     # Get the average of the entire data set
     arr_avg = np.average(npv_selected_data)
-    print(f'arr_avg: {arr_avg}')
     slice_axis = self.axes
+
     #slices are in x-axis
     if slice_axis == 0:
       layer_avg = np.average(npv_selected_data, axis=(0,1))
       correction_factor = layer_avg/arr_avg
-      corrected_data = npv_selected_data / correction_factor[None, None, :]
+      numpy_created_data_array = npv_selected_data / correction_factor[None, None, :] # Makes a copy
 
     #slices are in y-axis
     elif slice_axis == 1:
       layer_avg = np.average(npv_selected_data, axis=(0,2))
       correction_factor = layer_avg / arr_avg
-      corrected_data = npv_selected_data/correction_factor[None, :, None]
+      numpy_created_data_array = npv_selected_data / correction_factor[None, :, None] # Makes a copy
 
     #slices are in z-axis
     elif slice_axis == 2:
       layer_avg = np.average(npv_selected_data, axis=(1,2))
       correction_factor = layer_avg / arr_avg
-      corrected_data = npv_selected_data / correction_factor[:, None, None]
+      numpy_created_data_array = npv_selected_data / correction_factor[:, None, None] # Makes a copy
+    
+    # Assigns the data from the numpy array numpy_created_data_array to the view into the SIMPL.DataArray
+    # through a copy operation.
+    # https://numpy.org/doc/stable/user/basics.indexing.html#assigning-values-to-indexed-arrays
+    npv_created_data_array[...] = numpy_created_data_array
 
-    # if not self.create_data_array:
-    #   data = corrected_data
-      
     return (0, 'Success')
 
 
